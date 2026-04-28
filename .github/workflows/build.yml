@@ -1,4 +1,4 @@
-name: macOS PDF工具打包
+name: macOS PDF工具打包 (arm64)
 
 on:
   push:
@@ -7,20 +7,17 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-14  # M1 原生 runner
     
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       
       - name: 安装依赖
         run: |
-          pip install --upgrade pip
-          pip install PyPDF2
-          pip install nuitka
+          pip install PyPDF2 nuitka
       
       - name: 打包
         run: |
@@ -28,12 +25,11 @@ jobs:
             --standalone \
             --onefile \
             --follow-imports \
-            --include-package=PyPDF2 \
             --output-dir=build \
             pdf_tool.py
       
       - name: 上传
         uses: actions/upload-artifact@v4
         with:
-          name: PDF工具-macOS
+          name: PDF工具-macOS-arm64
           path: build/
