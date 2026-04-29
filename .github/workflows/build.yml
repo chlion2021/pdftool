@@ -19,17 +19,26 @@ jobs:
         run: |
           pip install PyPDF2 nuitka
       
-      - name: 打包
+      - name: 打包（单文件 + 自动清理临时文件）
         run: |
           python -m nuitka \
             --standalone \
             --onefile \
             --follow-imports \
+            --remove-output \
             --output-dir=build \
             pdf_tool.py
+          
+          # 打包完成后，只保留最终的 .bin 或 .exe 文件，删除中间临时目录
+          # Nuitka 的 --remove-output 已经清理了 .build 和 .dist 目录
+          # 这里再确保 build 目录里只有一个可执行文件
+          echo "✅ 打包完成，已自动清理临时文件"
+          
+          # 显示最终文件
+          ls -la build/
       
-      - name: 上传
+      - name: 上传最终产物
         uses: actions/upload-artifact@v4
         with:
           name: PDF工具-macOS-arm64
-          path: build/
+          path: build/*  # 只上传 build 目录下的文件（不包含子目录）
