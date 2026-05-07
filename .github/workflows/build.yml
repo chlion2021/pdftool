@@ -1,40 +1,15 @@
-name: macOS PDF工具打包 (arm64)
-
-on:
-  push:
-    branches: [ "main" ]
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: macos-14  # M1 原生 runner
+- name: 打包成 .app 应用
+  run: |
+    python -m nuitka \
+      --standalone \
+      --macos-create-app-bundle \
+      --follow-imports \
+      --enable-plugin=tk-inter \
+      --remove-output \
+      --output-dir=build \
+      pdf_tool.py
     
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      
-      - name: 安装依赖
-        run: |
-          pip install PyPDF2 nuitka
-      
-      - name: 打包（启用 Tkinter 插件）
-        run: |
-          python -m nuitka \
-            --standalone \
-            --onefile \
-            --follow-imports \
-            --enable-plugin=tk-inter \
-            --remove-output \
-            --output-dir=build \
-            pdf_tool.py
-          
-          echo "✅ 打包完成"
-          ls -la build/
-      
-      - name: 上传产物
-        uses: actions/upload-artifact@v4
-        with:
-          name: PDF工具-macOS-arm64
-          path: build/
+    # 给 .app 内的可执行文件加权限
+    chmod +x build/pdf_tool.app/Contents/MacOS/pdf_tool
+    
+    echo "✅ .app 应用打包完成"
